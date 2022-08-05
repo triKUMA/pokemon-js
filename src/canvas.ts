@@ -1,10 +1,12 @@
-const clearCanvas = (ctx: CanvasRenderingContext2D) => {
+export type CanvasContext = CanvasRenderingContext2D;
+
+const clearCanvas = (ctx: CanvasContext) => {
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
 const setCanvasSize = (
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasContext,
   aspectRatio: number,
   margin: number
 ) => {
@@ -32,7 +34,7 @@ const setCanvasSize = (
 export const initialiseCanvas = (
   aspectRatio: number,
   margin: number
-): CanvasRenderingContext2D => {
+): CanvasContext => {
   const canvas = document.querySelector("canvas");
 
   if (!canvas) throw new Error("The canvas element could not be found.");
@@ -48,4 +50,12 @@ export const initialiseCanvas = (
   });
 
   return ctx;
+};
+
+export const renderImage = (ctx: CanvasContext, src: string) => {
+  const image = new Image();
+  image.src = src;
+  image.onload = () => {
+    ctx.drawImage(image, 0, 0);
+  };
 };
