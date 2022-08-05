@@ -15,16 +15,22 @@ const setCanvasSize = (canvas: HTMLCanvasElement, aspectRatio: number) => {
   canvas.height = desiredCanvasSize.height;
 };
 
-export const initialiseCanvas = (aspectRatio: number): HTMLCanvasElement => {
+export const initialiseCanvas = (
+  aspectRatio: number
+): CanvasRenderingContext2D => {
   const canvas = document.querySelector("canvas");
 
-  if (!canvas) throw new Error("Canvas element could not be found.");
+  if (!canvas) throw new Error("The canvas element could not be found.");
 
-  setCanvasSize(canvas, aspectRatio);
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) throw new Error("The canvas context could not be retrieved.");
+
+  setCanvasSize(ctx.canvas, aspectRatio);
 
   window.addEventListener("resize", () => {
-    setCanvasSize(canvas, aspectRatio);
+    setCanvasSize(ctx.canvas, aspectRatio);
   });
 
-  return canvas;
+  return ctx;
 };
