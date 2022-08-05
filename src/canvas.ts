@@ -1,22 +1,37 @@
-const setCanvasSize = (canvas: HTMLCanvasElement, aspectRatio: number) => {
+const clearCanvas = (ctx: CanvasRenderingContext2D) => {
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+};
+
+const setCanvasSize = (
+  ctx: CanvasRenderingContext2D,
+  aspectRatio: number,
+  margin: number
+) => {
+  const marginDouble = 2 * margin;
+
   let desiredCanvasSize = {
-    width: window.innerWidth,
-    height: window.innerWidth * (1 / aspectRatio),
+    width: window.innerWidth - marginDouble,
+    height: window.innerWidth * (1 / aspectRatio) - marginDouble,
   };
 
-  if (window.innerHeight < desiredCanvasSize.height) {
+  if (window.innerHeight < desiredCanvasSize.height + marginDouble) {
     desiredCanvasSize = {
-      width: window.innerHeight * aspectRatio,
-      height: window.innerHeight,
+      width: window.innerHeight * aspectRatio - marginDouble,
+      height: window.innerHeight - marginDouble,
     };
   }
 
-  canvas.width = desiredCanvasSize.width;
-  canvas.height = desiredCanvasSize.height;
+  ctx.canvas.width = desiredCanvasSize.width;
+  ctx.canvas.height = desiredCanvasSize.height;
+  ctx.canvas.style.margin = `${margin}px`;
+
+  clearCanvas(ctx);
 };
 
 export const initialiseCanvas = (
-  aspectRatio: number
+  aspectRatio: number,
+  margin: number
 ): CanvasRenderingContext2D => {
   const canvas = document.querySelector("canvas");
 
@@ -26,10 +41,10 @@ export const initialiseCanvas = (
 
   if (!ctx) throw new Error("The canvas context could not be retrieved.");
 
-  setCanvasSize(ctx.canvas, aspectRatio);
+  setCanvasSize(ctx, aspectRatio, margin);
 
   window.addEventListener("resize", () => {
-    setCanvasSize(ctx.canvas, aspectRatio);
+    setCanvasSize(ctx, aspectRatio, margin);
   });
 
   return ctx;
