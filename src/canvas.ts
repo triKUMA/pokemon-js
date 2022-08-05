@@ -1,38 +1,17 @@
 export type CanvasContext = CanvasRenderingContext2D;
 
-const clearCanvas = (ctx: CanvasContext) => {
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-};
-
-const setCanvasSize = (
-  ctx: CanvasContext,
-  aspectRatio: number,
-  margin: number
-) => {
+const setCanvasScale = (ctx: CanvasContext, margin: number) => {
   const marginDouble = 2 * margin;
 
-  let desiredCanvasSize = {
-    width: window.innerWidth - marginDouble,
-    height: window.innerWidth * (1 / aspectRatio) - marginDouble,
-  };
+  const widthScale = (window.innerWidth - marginDouble) / ctx.canvas.width;
+  const heightScale = (window.innerHeight - marginDouble) / ctx.canvas.height;
 
-  if (window.innerHeight < desiredCanvasSize.height + marginDouble) {
-    desiredCanvasSize = {
-      width: window.innerHeight * aspectRatio - marginDouble,
-      height: window.innerHeight - marginDouble,
-    };
-  }
-
-  ctx.canvas.width = desiredCanvasSize.width;
-  ctx.canvas.height = desiredCanvasSize.height;
-  ctx.canvas.style.margin = `${margin}px`;
-
-  clearCanvas(ctx);
+  ctx.canvas.style.scale = `${Math.min(widthScale, heightScale)}`;
 };
 
 export const initialiseCanvas = (
-  aspectRatio: number,
+  width: number,
+  height: number,
   margin: number
 ): CanvasContext => {
   const canvas = document.querySelector("canvas");
@@ -43,10 +22,14 @@ export const initialiseCanvas = (
 
   if (!ctx) throw new Error("The canvas context could not be retrieved.");
 
-  setCanvasSize(ctx, aspectRatio, margin);
+  ctx.canvas.width = width;
+  ctx.canvas.height = height;
+  ctx.canvas.style.margin = `${margin}px`;
+
+  setCanvasScale(ctx, margin);
 
   window.addEventListener("resize", () => {
-    setCanvasSize(ctx, aspectRatio, margin);
+    setCanvasScale(ctx, margin);
   });
 
   return ctx;

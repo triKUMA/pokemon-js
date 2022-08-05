@@ -7,6 +7,10 @@
 body {
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
   background-color: black;
+}
+
+canvas {
+  image-rendering: pixelated;
+  transform-origin: 0 0;
 }

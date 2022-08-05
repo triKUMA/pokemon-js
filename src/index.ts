@@ -1,10 +1,11 @@
 import { initialiseCanvas, renderImage } from "./canvas";
 
-const ASPECT_RATIO = 16 / 9;
+const WIDTH = 320;
+const HEIGHT = 180;
 const MARGIN = 12;
 
 function main() {
-  const ctx = initialiseCanvas(ASPECT_RATIO, MARGIN);
+  const ctx = initialiseCanvas(WIDTH, HEIGHT, MARGIN);
 
   renderImage(ctx, "./img/Pellet Town.png");
 }
