@@ -1,11 +1,8 @@
+import config from "./config";
 import { initialiseCanvas, renderImage } from "./canvas";
 
-const WIDTH = 320;
-const HEIGHT = 180;
-const MARGIN = 12;
-
 function main() {
-  const ctx = initialiseCanvas(WIDTH, HEIGHT, MARGIN);
+  const ctx = initialiseCanvas(config.width, config.height, config.margin);
 
   renderImage(ctx, "./img/Pellet Town.png");
 }
