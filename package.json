@@ -1,0 +1,13 @@
+{
+  "name": "pokemon-js",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "concurrently \"tsc -w index.ts\" \"live-server --watch=\"index.html,index.css,index.js\"\""
+  },
+  "dependencies": {
+    "concurrently": "^7.3.0",
+    "live-server": "^1.2.2"
+  }
+}
