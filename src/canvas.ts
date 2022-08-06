@@ -34,16 +34,3 @@ export const initialiseCanvas = (
 
   return ctx;
 };
-
-export const renderImage = (
-  ctx: CanvasContext,
-  src: string,
-  x: number,
-  y: number
-) => {
-  const image = new Image();
-  image.src = src;
-  image.onload = () => {
-    ctx.drawImage(image, x, y);
-  };
-};
