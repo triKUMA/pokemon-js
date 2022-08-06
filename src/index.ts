@@ -1,5 +1,5 @@
-import { initialiseCanvas } from "./canvas";
-import keys, { Keys } from "./input";
+import { CanvasContext, clearCanvas, initialiseCanvas } from "./canvas";
+import keys, { Keys, currentPressedKeys } from "./input";
 import Sprite, { drawSprite, drawSpriteCropped } from "./sprite";
 
 const config = {
@@ -21,8 +21,15 @@ const config = {
   },
 };
 
-const animate = (level: Sprite, player: Sprite, keys: Keys) => {
-  window.requestAnimationFrame(() => animate(level, player, keys));
+const animate = (
+  ctx: CanvasContext,
+  level: Sprite,
+  player: Sprite,
+  keys: Keys
+) => {
+  window.requestAnimationFrame(() => animate(ctx, level, player, keys));
+  clearCanvas(ctx);
+
   drawSprite(level);
   drawSpriteCropped(player, {
     position: { x: 0, y: 0 },
@@ -30,13 +37,23 @@ const animate = (level: Sprite, player: Sprite, keys: Keys) => {
     height: 17,
   });
 
-  const xVelocity = +keys.a.pressed - +keys.d.pressed;
-  const yVelocity = +keys.w.pressed - +keys.s.pressed;
+  let xVelocity = +keys.a.pressed - +keys.d.pressed || 0;
+  let yVelocity = +keys.w.pressed - +keys.s.pressed || 0;
 
-  level.position = {
-    x: level.position.x + xVelocity,
-    y: level.position.y + yVelocity,
-  };
+  // if (xVelocity !== 0 || yVelocity !== 0) {
+  //   const magnitude = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
+
+  //   xVelocity /= magnitude;
+  //   yVelocity /= magnitude;
+  // }
+
+  const lastPressedKey =
+    currentPressedKeys[currentPressedKeys.length - 1] || "";
+  if (xVelocity && (lastPressedKey === "a" || lastPressedKey === "d")) {
+    level.position.x += xVelocity / 2;
+  } else if (yVelocity && (lastPressedKey === "w" || lastPressedKey === "s")) {
+    level.position.y += yVelocity / 2;
+  }
 };
 
 async function main() {
@@ -55,7 +72,7 @@ async function main() {
     y: config.canvas.height / 2,
   });
 
-  animate(level, player, keys);
+  animate(ctx, level, player, keys);
 }
 
 main();

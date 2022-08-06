@@ -13,5 +13,7 @@ body {
 
 canvas {
   image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
   transform-origin: 0 0;
 }

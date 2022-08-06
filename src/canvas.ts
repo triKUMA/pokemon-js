@@ -34,3 +34,8 @@ export const initialiseCanvas = (
 
   return ctx;
 };
+
+export const clearCanvas = (ctx: CanvasContext) => {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+};

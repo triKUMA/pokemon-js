@@ -26,7 +26,11 @@ class Sprite {
 }
 
 export const drawSprite = (sprite: Sprite) => {
-  sprite.ctx.drawImage(sprite.image, sprite.position.x, sprite.position.y);
+  sprite.ctx.drawImage(
+    sprite.image,
+    Math.floor(sprite.position.x),
+    Math.floor(sprite.position.y)
+  );
 };
 
 interface CropDetails {
@@ -42,8 +46,8 @@ export const drawSpriteCropped = (sprite: Sprite, cropDetails: CropDetails) => {
     cropDetails.position.y,
     cropDetails.width,
     cropDetails.height,
-    sprite.position.x,
-    sprite.position.y,
+    Math.floor(sprite.position.x),
+    Math.floor(sprite.position.y),
     cropDetails.width,
     cropDetails.height
   );
