@@ -4,6 +4,7 @@ export interface Keys {
   };
 }
 
+// Object containing all tracked keys, as well as whether the keys are currently pressed.
 const keys: Keys = {
   w: {
     pressed: false,
@@ -19,19 +20,17 @@ const keys: Keys = {
   },
 };
 
-export let currentPressedKeys: string[] = [];
-
+// Set a tracked key's pressed value to true.
 window.addEventListener("keydown", (e) => {
   if (keys[e.key]) {
     keys[e.key].pressed = true;
-    currentPressedKeys[currentPressedKeys.length] = e.key;
   }
 });
 
+// Set a tracked key's pressed value to false.
 window.addEventListener("keyup", (e) => {
   if (keys[e.key]) {
     keys[e.key].pressed = false;
-    currentPressedKeys = currentPressedKeys.filter((key) => key !== e.key);
   }
 });
 

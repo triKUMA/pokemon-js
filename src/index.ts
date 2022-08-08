@@ -1,11 +1,12 @@
-import { CanvasContext, clearCanvas, initialiseCanvas } from "./canvas";
-import keys, { Keys, currentPressedKeys } from "./input";
-import Sprite, { drawSprite, drawSpriteCropped } from "./sprite";
+import Canvas, { clearCanvas } from "./canvas";
+import keys, { Keys } from "./input";
+import Sprite, { drawFrame, drawSprite } from "./sprite";
 
+// The game config object. This describes details about the game.
 const config = {
   canvas: {
-    width: 250,
-    height: 180,
+    aspectRatio: 4 / 3,
+    pixelScale: 5,
     margin: 12,
   },
   level: {
@@ -18,61 +19,65 @@ const config = {
       left: "./img/playerLeft.png",
       right: "./img/playerRight.png",
     },
+    speed: 2,
   },
 };
 
-const animate = (
-  ctx: CanvasContext,
-  level: Sprite,
-  player: Sprite,
-  keys: Keys
-) => {
-  window.requestAnimationFrame(() => animate(ctx, level, player, keys));
-  clearCanvas(ctx);
-
-  drawSprite(level);
-  drawSpriteCropped(player, {
-    position: { x: 0, y: 0 },
-    width: 12,
-    height: 17,
-  });
-
-  let xVelocity = +keys.a.pressed - +keys.d.pressed || 0;
-  let yVelocity = +keys.w.pressed - +keys.s.pressed || 0;
-
-  // if (xVelocity !== 0 || yVelocity !== 0) {
-  //   const magnitude = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
-
-  //   xVelocity /= magnitude;
-  //   yVelocity /= magnitude;
-  // }
-
-  const lastPressedKey =
-    currentPressedKeys[currentPressedKeys.length - 1] || "";
-  if (xVelocity && (lastPressedKey === "a" || lastPressedKey === "d")) {
-    level.position.x += xVelocity / 2;
-  } else if (yVelocity && (lastPressedKey === "w" || lastPressedKey === "s")) {
-    level.position.y += yVelocity / 2;
-  }
-};
-
+// The main game function, which initialises and runs the game.
 async function main() {
-  const ctx = initialiseCanvas(
-    config.canvas.width,
-    config.canvas.height,
+  // Initialise the canvas.
+  const canvas = Canvas.initialise(
+    config.canvas.aspectRatio,
+    config.canvas.pixelScale,
     config.canvas.margin
   );
 
-  const level = await Sprite.load(ctx, config.level.imgSrc, {
-    x: -181,
-    y: -130,
+  // Create both the level and player sprites.
+  const level = await Sprite.create(config.level.imgSrc, {
+    x: 0,
+    y: 0,
   });
-  const player = await Sprite.load(ctx, config.player.animationSrc.down, {
-    x: config.canvas.width / 2,
-    y: config.canvas.height / 2,
+  const player = await Sprite.create(config.player.animationSrc.down, {
+    x: 0,
+    y: 0,
   });
 
-  animate(ctx, level, player, keys);
+  // Run the game loop.
+  gameLoop(level, player, config.player.speed, keys);
 }
 
+// The game loop function. This runs on every frame of the game.
+const gameLoop = (level: Sprite, player: Sprite, speed: number, keys: Keys) => {
+  // Clear the canvas with black, to reset the view for this frame's
+  clearCanvas();
+
+  // Calculate the x and y velocity of the player.
+  let xVelocity = +keys.a.pressed - +keys.d.pressed || 0;
+  let yVelocity = +keys.w.pressed - +keys.s.pressed || 0;
+
+  // If the player velocity is not zero, normalise the velocity vector to unit length.
+  if (xVelocity !== 0 || yVelocity !== 0) {
+    // Calculate the velocity vector's magnitude (length).
+    const magnitude = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
+
+    // Normalise the velocity.
+    xVelocity /= magnitude;
+    yVelocity /= magnitude;
+  }
+
+  // Update the player's position, based on the velocity.
+  level.position = {
+    x: level.position.x + xVelocity / 2,
+    y: level.position.y + yVelocity / 2,
+  };
+
+  // Render the level and player to the screen.
+  drawSprite(level);
+  drawFrame(player, { tileSize: { width: 12, height: 17 } }, 0);
+
+  // Queue up the next game loop frame.
+  window.requestAnimationFrame(() => gameLoop(level, player, speed, keys));
+};
+
+// Run the game.
 main();
