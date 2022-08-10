@@ -7,8 +7,6 @@ class Sprite {
   readonly images: { [key: number]: HTMLImageElement };
   // The position of the sprite to render to the canvas. This is in world coordinates, not screen coordinates.
   position: Position;
-  // The current pixelScale that the sprite is rendering at.
-  private pixelScale: number;
 
   private constructor(
     images: { [key: number]: HTMLImageElement },
@@ -16,18 +14,13 @@ class Sprite {
   ) {
     this.images = images;
     this.position = worldPosToScreenPos(position);
-    this.pixelScale = Canvas.get().pixelScale;
 
-    // Attach an event listener to the canvas for when the pixel scale changes. If the sprite image has
-    // not been generated at its current level, then a new one will be generated.
+    // Attach an event listener to the canvas for when the pixel scale changes. The sprite image
+    // will be generated at the new canvas pixel scale.
     Canvas.get().element.addEventListener("pixelscalechange", ((
       e: CustomEvent
     ) => {
-      const pixelScale = Canvas.get().pixelScale;
-      if (this.pixelScale !== pixelScale) {
-        this.pixelScale = pixelScale;
-        generateSpriteImgScaled(this, pixelScale);
-      }
+      generateSpriteImgScaled(this, Canvas.get().pixelScale);
     }) as EventListener);
   }
 
