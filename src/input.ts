@@ -1,11 +1,13 @@
-export interface Keys {
-  [key: string]: {
-    pressed: boolean;
-  };
+export interface Input {
+  [key: string]: KeyDetails;
+}
+
+export interface KeyDetails {
+  pressed: boolean;
 }
 
 // Object containing all tracked keys, as well as whether the keys are currently pressed.
-const keys: Keys = {
+const input: Input = {
   w: {
     pressed: false,
   },
@@ -20,18 +22,14 @@ const keys: Keys = {
   },
 };
 
-// Set a tracked key's pressed value to true.
+// Set a key's pressed value to true.
 window.addEventListener("keydown", (e) => {
-  if (keys[e.key]) {
-    keys[e.key].pressed = true;
-  }
+  input[e.key] = { ...input[e.key], pressed: true };
 });
 
-// Set a tracked key's pressed value to false.
+// Set a key's pressed value to false.
 window.addEventListener("keyup", (e) => {
-  if (keys[e.key]) {
-    keys[e.key].pressed = false;
-  }
+  input[e.key] = { ...input[e.key], pressed: false };
 });
 
-export default keys;
+export default input;
