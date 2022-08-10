@@ -27,6 +27,7 @@ export type TilesetDataCore = Pick<
   | "imageheight"
 >;
 
+// Converts TilesetData type into TilesetDataCore type. This removes any unwanted properties not in TilesetDataCore.
 export const stripTilesetAncillaryData = ({
   name,
   image,
@@ -79,6 +80,7 @@ export type TileMapDataCore = Pick<
   layers: TileMapLayerDataCore[];
 };
 
+// Converts TileMapData type into TileMapDataCore type. This removes any unwanted properties not in TileMapDataCore.
 export const stripTileMapAncillaryData = ({
   tilewidth,
   tileheight,
@@ -124,6 +126,7 @@ export type TileMapLayerDataCore = Pick<
   "width" | "height" | "visible" | "data"
 >;
 
+// Converts TileMapLayerData type into TileMapLayerDataCore type. This removes any unwanted properties not in TileMapLayerDataCore.
 export const stripTileMapLayerAncillaryData = ({
   width,
   height,

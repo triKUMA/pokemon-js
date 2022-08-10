@@ -1,4 +1,4 @@
-import Canvas, { clearCanvas } from "./canvas";
+import Canvas, { clearCanvas, translateCanvasOrigin } from "./canvas";
 import input, { Input } from "./input";
 import Sprite, { drawFrame, drawSprite } from "./sprite";
 import { TilesetCollection } from "./types/TileTypes";
@@ -98,10 +98,13 @@ const gameLoop = (details: GameDetails) => {
   yVelocity *= playerSpeed;
 
   // Update the player's position, based on the velocity.
-  details.level.position = {
-    x: level.position.x + xVelocity,
-    y: level.position.y + yVelocity,
+  player.position = {
+    x: player.position.x - xVelocity,
+    y: player.position.y - yVelocity,
   };
+
+  // Update canvas origin to be on player, so canvas always tracks the player.
+  translateCanvasOrigin(xVelocity, yVelocity);
 
   // Render the level and player to the screen.
   drawSprite(level);

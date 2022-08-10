@@ -3,13 +3,18 @@ import { Size } from "./types/Size";
 
 class Canvas {
   // The global canvas singleton instance.
-  private static instace: Canvas | null;
+  private static instance: Canvas | null;
   // The html canvas element.
   element: HTMLCanvasElement;
-  // The size of the canvas screen, in world coordinates.
-  size: Size;
   // The canvas context.
   ctx: CanvasRenderingContext2D;
+
+  // The size of the canvas screen, in world coordinates.
+  size: Size;
+  // The origin of the canvas that all sprites are offset by when rendered to the screen. This is in
+  // world coordinates.
+  origin: Position;
+
   // The current canvas pixel scale.
   pixelScale: number;
   // The base pixel scale the current pixel scale is calculated from.
@@ -24,6 +29,8 @@ class Canvas {
     this.ctx = ctx;
 
     this.size = { width: 0, height: 0 };
+    this.origin = { x: 0, y: 0 };
+
     this.desiredPixelScale = pixelScale;
     this.pixelScale = pixelScale;
   }
@@ -35,7 +42,7 @@ class Canvas {
     margin: number
   ): Canvas {
     // Only initialise the canvas if the instance has not been set yet.
-    if (!Canvas.instace) {
+    if (!Canvas.instance) {
       // Get the canvas element.
       const canvas = document.querySelector("canvas");
       if (!canvas) throw new Error("The canvas element could not be found.");
@@ -45,7 +52,7 @@ class Canvas {
       if (!ctx) throw new Error("The canvas context could not be retrieved.");
 
       // Set the canvas instance.
-      Canvas.instace = new Canvas(canvas, ctx, pixelScale);
+      Canvas.instance = new Canvas(canvas, ctx, pixelScale);
 
       // Calculate the size of the canvas.
       canvas.style.margin = `${margin}px`;
@@ -65,12 +72,12 @@ class Canvas {
 
   // Get the canvas singleton. This typechecks the canvas instance so that it is not type null.
   static get(): Canvas {
-    if (!Canvas.instace)
+    if (!Canvas.instance)
       throw new Error(
         "Canvas has not been initialised correctly. Try calling Canvas.initialise() at the start of your script."
       );
 
-    return Canvas.instace;
+    return Canvas.instance;
   }
 }
 
@@ -113,8 +120,35 @@ const setCanvasSize = (aspectRatio: number, margin: number) => {
   // If the updated pixel scale is different to the previous one, fire a 'pixelscalechange' event.
   if (prevPixelScale !== canvas.pixelScale) {
     const pixelScaleEvent = new CustomEvent("pixelscalechange");
+    clearCanvas();
     canvas.element.dispatchEvent(pixelScaleEvent);
   }
+
+  // Reposition canvas origin to original offset, as it is reset to [0, 0] on resize.
+  const canvasOrigin = canvas.origin;
+  // The origin must be set back to [0, 0] first to match the reset origin of the canvas element.
+  canvas.origin = { x: 0, y: 0 };
+  translateCanvasOrigin(canvasOrigin.x, canvasOrigin.y);
+};
+
+// Translate the canvas origin by the provided values.
+export const translateCanvasOrigin = (dx: number, dy: number) => {
+  const canvas = Canvas.get();
+
+  // Reset the canvas element origin to [0, 0].
+  canvas.ctx.resetTransform();
+
+  // Add the delta values to the current origin.
+  canvas.origin = {
+    x: canvas.origin.x + dx,
+    y: canvas.origin.y + dy,
+  };
+
+  // Translate the canvas origin, accounting for the pixel scale.
+  canvas.ctx.translate(
+    canvas.origin.x * canvas.pixelScale,
+    canvas.origin.y * canvas.pixelScale
+  );
 };
 
 // Clear the canvas with a provided style, with the default being black.

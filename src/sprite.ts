@@ -2,32 +2,25 @@ import Canvas, { worldPosToScreenPos } from "./canvas";
 import { Position } from "./types/Position";
 import { Size } from "./types/Size";
 
+export interface SpriteImageCollection {
+  [key: number]: HTMLImageElement;
+}
+
 class Sprite {
   // Collection of images at each scale resolution. Each image is generated only once, as needed.
-  readonly images: { [key: number]: HTMLImageElement };
+  readonly images: SpriteImageCollection;
   // The position of the sprite to render to the canvas. This is in world coordinates, not screen coordinates.
   position: Position;
 
-  private constructor(
-    images: { [key: number]: HTMLImageElement },
-    position: Position
-  ) {
+  private constructor(images: SpriteImageCollection, position: Position) {
     this.images = images;
     this.position = worldPosToScreenPos(position);
-
-    // Attach an event listener to the canvas for when the pixel scale changes. The sprite image
-    // will be generated at the new canvas pixel scale.
-    Canvas.get().element.addEventListener("pixelscalechange", ((
-      e: CustomEvent
-    ) => {
-      generateSpriteImgScaled(this, Canvas.get().pixelScale);
-    }) as EventListener);
   }
 
   // Create a new sprite from a given source path, with a position in the canvas.
   static async create(src: string, position: Position) {
     // Load the 1-to-1 pixel scale image.
-    let images: { [key: number]: HTMLImageElement } = {
+    let images: SpriteImageCollection = {
       1: await Sprite.loadImage(src),
     };
 
@@ -36,6 +29,14 @@ class Sprite {
 
     //Generate sprite's image at current canvas pixel scale.
     generateSpriteImgScaled(sprite, Canvas.get().pixelScale);
+
+    // Attach an event listener to the canvas for when the pixel scale changes. The sprite image
+    // will be generated at the new canvas pixel scale.
+    Canvas.get().element.addEventListener("pixelscalechange", ((
+      e: CustomEvent
+    ) => {
+      generateSpriteImgScaled(sprite, Canvas.get().pixelScale);
+    }) as EventListener);
 
     // Create and return a new sprite with the upscaled image.
     return sprite;
@@ -141,6 +142,12 @@ export const drawSprite = (sprite: Sprite) => {
   // Get the current image to render.
   const spriteImg = sprite.images[canvas.pixelScale];
 
+  // Calculate the origin offset value to render the image pixel perfect.
+  const originOffset: Size = {
+    width: (canvas.origin.x * canvas.pixelScale) % 1,
+    height: (canvas.origin.y * canvas.pixelScale) % 1,
+  };
+
   // Draw the whole image to the canvas.
   canvas.ctx.drawImage(
     // Image to draw
@@ -155,11 +162,11 @@ export const drawSprite = (sprite: Sprite) => {
     ~~(
       canvas.element.width / 2 +
       (sprite.position.x * canvas.pixelScale - spriteImg.width / 2)
-    ),
+    ) - originOffset.width,
     ~~(
       canvas.element.height / 2 +
       (sprite.position.y * canvas.pixelScale - spriteImg.height / 2)
-    ),
+    ) - originOffset.height,
     // Width and height of area to render image to on canvas (will scale image if values do not match crop
     // area's width and height)
     spriteImg.width,
@@ -188,6 +195,12 @@ export const drawSpriteCropped = (sprite: Sprite, cropDetails: CropDetails) => {
   // Get the current image to render.
   const spriteImg = sprite.images[canvas.pixelScale];
 
+  // Calculate the origin offset value to render the image pixel perfect.
+  const originOffset: Size = {
+    width: (canvas.origin.x * canvas.pixelScale) % 1,
+    height: (canvas.origin.y * canvas.pixelScale) % 1,
+  };
+
   // Draw the cropped image to the canvas.
   canvas.ctx.drawImage(
     // Image to draw
@@ -202,11 +215,11 @@ export const drawSpriteCropped = (sprite: Sprite, cropDetails: CropDetails) => {
     ~~(
       canvas.element.width / 2 +
       (sprite.position.x - cropDetails.size.width / 2) * canvas.pixelScale
-    ),
+    ) - originOffset.width,
     ~~(
       canvas.element.height / 2 +
       (sprite.position.y - cropDetails.size.height / 2) * canvas.pixelScale
-    ),
+    ) - originOffset.height,
     // Width and height of area to render image to on canvas (will scale image if values do not match crop
     // area's width and height)
     cropDetails.size.width * canvas.pixelScale,
@@ -262,7 +275,7 @@ export const drawFrame = (
   });
 };
 
-// Draws a single black pixel at the sprite's position.
+// Draws a single black pixel at the sprite's origin.
 const drawOrigin = (sprite: Sprite) => {
   const canvas = Canvas.get();
   canvas.ctx.fillStyle = "black";
