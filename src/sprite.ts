@@ -55,13 +55,13 @@ class Sprite {
   }
 }
 
+// ------------------- Credit -------------------
+// Link: https://stackoverflow.com/questions/7809345/html5-canvas-is-there-a-way-to-resize-image-with-nearest-neighbour-resampling
+// User: Polyducks (https://stackoverflow.com/users/4998471/polyducks)
+// --------------------------------------------
 // Resizes a provided image, based on the scale value. Returns a source path string to the newly
 // scaled image.
 const resizeNearestNeighbour = (img: HTMLImageElement, scale: number) => {
-  // ------------------- Credit -------------------
-  // Link: https://stackoverflow.com/questions/7809345/html5-canvas-is-there-a-way-to-resize-image-with-nearest-neighbour-resampling
-  // User: Polyducks (https://stackoverflow.com/users/4998471/polyducks)
-
   //make shortcuts for image width and height
   var w = img.width;
   var h = img.height;
