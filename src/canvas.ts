@@ -132,6 +132,26 @@ const setCanvasSize = (aspectRatio: number, margin: number) => {
 };
 
 // Translate the canvas origin by the provided values.
+export const setCanvasOrigin = (x: number, y: number) => {
+  const canvas = Canvas.get();
+
+  // Reset the canvas element origin to [0, 0].
+  canvas.ctx.resetTransform();
+
+  // Set the origin.
+  canvas.origin = {
+    x: x,
+    y: y,
+  };
+
+  // Translate the canvas origin, accounting for the pixel scale.
+  canvas.ctx.translate(
+    canvas.origin.x * canvas.pixelScale,
+    canvas.origin.y * canvas.pixelScale
+  );
+};
+
+// Translate the canvas origin by the provided values.
 export const translateCanvasOrigin = (dx: number, dy: number) => {
   const canvas = Canvas.get();
 
@@ -154,8 +174,13 @@ export const translateCanvasOrigin = (dx: number, dy: number) => {
 // Clear the canvas with a provided style, with the default being black.
 export const clearCanvas = (style: string = "black") => {
   const canvas = Canvas.get();
+  const canvasOrigin = canvas.origin;
+  canvas.ctx.resetTransform();
+
   canvas.ctx.fillStyle = style;
   canvas.ctx.fillRect(0, 0, canvas.element.width, canvas.element.height);
+
+  setCanvasOrigin(canvasOrigin.x, canvasOrigin.y);
 };
 
 // Convert a world position to a screen position.
