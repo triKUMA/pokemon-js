@@ -1,4 +1,4 @@
-import Canvas, { worldPosToScreenPos } from "./canvas";
+import Canvas from "./canvas";
 import { Position } from "./types/Position";
 import { Size } from "./types/Size";
 
@@ -14,7 +14,7 @@ class Sprite {
 
   private constructor(images: SpriteImageCollection, position: Position) {
     this.images = images;
-    this.position = worldPosToScreenPos(position);
+    this.position = position;
   }
 
   // Create a new sprite from a given source path, with a position in the canvas.
