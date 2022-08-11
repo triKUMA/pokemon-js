@@ -8,7 +8,7 @@ import { generateTilesets } from "./tile";
 const config = {
   canvas: {
     aspectRatio: 4 / 3,
-    pixelScale: 5,
+    pixelScale: 3,
     margin: 12,
   },
   level: {
@@ -51,8 +51,8 @@ async function main() {
 
   // Create both the level and player sprites.
   const level = await Sprite.create(config.level.imgSrc, {
-    x: 0,
-    y: 0,
+    x: 107.5,
+    y: 15,
   });
   const player = await Sprite.create(config.player.animationSrc.down, {
     x: 0,
