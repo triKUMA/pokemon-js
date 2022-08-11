@@ -128,7 +128,7 @@ const generateSpriteImgScaled = (sprite: Sprite, scale: number) => {
 };
 
 // Draw a sprite's whole image to the canvas, based on its position value.
-export const drawSprite = (sprite: Sprite) => {
+export const drawSprite = (sprite: Sprite, position: Position) => {
   const canvas = Canvas.get();
 
   // If the sprite image has not yet been generated at the current canvas pixel scale, or the image
@@ -161,11 +161,11 @@ export const drawSprite = (sprite: Sprite) => {
     // Position on canvas to render image
     ~~(
       canvas.element.width / 2 +
-      (sprite.position.x * canvas.pixelScale - spriteImg.width / 2)
+      (position.x * canvas.pixelScale - spriteImg.width / 2)
     ) - originOffset.width,
     ~~(
       canvas.element.height / 2 +
-      (sprite.position.y * canvas.pixelScale - spriteImg.height / 2)
+      (position.y * canvas.pixelScale - spriteImg.height / 2)
     ) - originOffset.height,
     // Width and height of area to render image to on canvas (will scale image if values do not match crop
     // area's width and height)
@@ -181,7 +181,11 @@ interface CropDetails {
 }
 
 // Draw a portion of a sprite's image, based on the provided crop details.
-export const drawSpriteCropped = (sprite: Sprite, cropDetails: CropDetails) => {
+export const drawSpriteCropped = (
+  sprite: Sprite,
+  position: Position,
+  cropDetails: CropDetails
+) => {
   const canvas = Canvas.get();
 
   // If the sprite image has not yet been generated at the current canvas pixel scale, or the image
@@ -214,11 +218,11 @@ export const drawSpriteCropped = (sprite: Sprite, cropDetails: CropDetails) => {
     // Position on canvas to render image
     ~~(
       canvas.element.width / 2 +
-      (sprite.position.x - cropDetails.size.width / 2) * canvas.pixelScale
+      (position.x - cropDetails.size.width / 2) * canvas.pixelScale
     ) - originOffset.width,
     ~~(
       canvas.element.height / 2 +
-      (sprite.position.y - cropDetails.size.height / 2) * canvas.pixelScale
+      (position.y - cropDetails.size.height / 2) * canvas.pixelScale
     ) - originOffset.height,
     // Width and height of area to render image to on canvas (will scale image if values do not match crop
     // area's width and height)
@@ -228,12 +232,14 @@ export const drawSpriteCropped = (sprite: Sprite, cropDetails: CropDetails) => {
 };
 
 interface SpritesheetDetails {
+  size: Size;
   tileSize: Size;
 }
 
 // Draw a single frame from a spritesheet.
 export const drawFrame = (
   sprite: Sprite,
+  position: Position,
   spritesheetDetails: SpritesheetDetails,
   frameIndex: number
 ) => {
@@ -250,23 +256,17 @@ export const drawFrame = (
   // Get the current image to render.
   const spriteImg = sprite.images[canvas.pixelScale];
 
-  // Get the size of a single tile in the spritesheet.
+  const spritesheetSize = spritesheetDetails.size;
   const tileSize = spritesheetDetails.tileSize;
-
-  // Determine how many tiles wide and tall the spritesheet is.
-  const spritesheetSize: Size = {
-    width: spriteImg.width / tileSize.width,
-    height: spriteImg.height / tileSize.height,
-  };
 
   // Determine the x and y value of the tile to render, determined from the spritesheet size.
   const frame = {
     x: frameIndex % spritesheetSize.width,
-    y: Math.floor(frameIndex / spritesheetSize.height),
+    y: Math.floor(frameIndex / spritesheetSize.width),
   };
 
   // Draw only the desired frame from the spritesheet.
-  drawSpriteCropped(sprite, {
+  drawSpriteCropped(sprite, position, {
     origin: {
       x: frame.x * tileSize.width * canvas.pixelScale,
       y: frame.y * tileSize.height * canvas.pixelScale,
@@ -276,7 +276,7 @@ export const drawFrame = (
 };
 
 // Draws a single black pixel at the sprite's origin.
-const drawOrigin = (sprite: Sprite) => {
+export const drawOrigin = (sprite: Sprite) => {
   const canvas = Canvas.get();
   canvas.ctx.fillStyle = "black";
   canvas.ctx.fillRect(

@@ -1,8 +1,12 @@
 import Canvas, { clearCanvas, translateCanvasOrigin } from "./canvas";
 import input, { Input } from "./input";
-import Sprite, { drawFrame, drawSprite } from "./sprite";
-import { TilesetCollection } from "./types/TileTypes";
-import { generateTilesets } from "./tile";
+import Sprite, { drawFrame } from "./sprite";
+import {
+  stripTileMapAncillaryData,
+  TileMap,
+  TilesetCollection,
+} from "./types/TileTypes";
+import { generateTilesets, renderTileMap } from "./tile";
 
 // The game config object. This describes details about the game.
 const config = {
@@ -12,7 +16,7 @@ const config = {
     margin: 12,
   },
   level: {
-    imgSrc: "./img/Pellet Town.png",
+    tilemap: "./data/tilemaps/pelletTown.json",
   },
   player: {
     animationSrc: {
@@ -31,8 +35,8 @@ const config = {
 
 interface GameDetails {
   tilesets: TilesetCollection;
+  tilemap: TileMap;
   input: Input;
-  level: Sprite;
   player: Sprite;
   playerSpeed: number;
 }
@@ -47,23 +51,25 @@ async function main() {
   );
 
   // Generate the tileset objects for the game, which tilemaps reference to draw their data to the screen.
-  const tilesets = generateTilesets(config.tilesets);
+  const tilesets = await generateTilesets(config.tilesets);
 
-  // Create both the level and player sprites.
-  const level = await Sprite.create(config.level.imgSrc, {
-    x: 107.5,
-    y: 15,
-  });
+  // Create both the player and level.
   const player = await Sprite.create(config.player.animationSrc.down, {
     x: 0,
     y: 0,
   });
 
+  const pelletTown: TileMap = {
+    data: stripTileMapAncillaryData(
+      await fetch(config.level.tilemap).then((res) => res.json())
+    ),
+    position: { x: 114, y: 20 },
+  };
   // The game details needed for each game loop/frame.
   const details: GameDetails = {
     tilesets: tilesets,
+    tilemap: pelletTown,
     input: input,
-    level: level,
     player: player,
     playerSpeed: config.player.speed,
   };
@@ -74,7 +80,7 @@ async function main() {
 
 // The game loop function. This runs on every frame of the game.
 const gameLoop = (details: GameDetails) => {
-  const { tilesets, input, level, player } = details;
+  const { tilesets, tilemap, input, player } = details;
   const playerSpeed = details.playerSpeed / 10;
 
   // Clear the canvas with black, to reset the view for this frame's
@@ -107,8 +113,13 @@ const gameLoop = (details: GameDetails) => {
   translateCanvasOrigin(xVelocity, yVelocity);
 
   // Render the level and player to the screen.
-  drawSprite(level);
-  drawFrame(player, { tileSize: { width: 12, height: 17 } }, 0);
+  renderTileMap(tilemap, tilesets);
+  drawFrame(
+    player,
+    player.position,
+    { size: { width: 4, height: 1 }, tileSize: { width: 12, height: 17 } },
+    0
+  );
 
   // Queue up the next game loop frame.
   window.requestAnimationFrame(() => gameLoop(details));
