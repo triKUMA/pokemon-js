@@ -8,7 +8,7 @@ import { generateTilesets } from "./tile";
 const config = {
   canvas: {
     aspectRatio: 4 / 3,
-    pixelScale: 3,
+    pixelScale: 4,
     margin: 12,
   },
   level: {
